@@ -3,14 +3,13 @@ import 'package:dish_dispatch/providers/api_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:routemaster/routemaster.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class RestaurantGridItem extends StatelessWidget {
-  final String id;
-  final Restaurant restaurant;
+  final BaseRestaurant restaurant;
 
   const RestaurantGridItem({
     super.key,
-    required this.id,
     required this.restaurant,
   });
 
@@ -22,7 +21,8 @@ class RestaurantGridItem extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: () => Routemaster.of(context).push("/restaurants/$id"),
+        onTap: () =>
+            Routemaster.of(context).push("/restaurants/${restaurant.phone}"),
         child: GridTile(
           footer: GridTileBar(
             backgroundColor: colorScheme.secondaryContainer,
@@ -44,9 +44,9 @@ class RestaurantGridItem extends StatelessWidget {
               color: colorScheme.onSecondaryContainer,
             ),
           ),
-          child: Image.network(
-            Provider.of<APIProvider>(context).getRestaurantImageUri(
-              restaurant: id,
+          child: CachedNetworkImage(
+            imageUrl: Provider.of<APIProvider>(context, listen: false).getRestaurantImageUri(
+              restaurant: restaurant.phone,
               filename: "hero.jpg",
             ),
             fit: BoxFit.cover,
