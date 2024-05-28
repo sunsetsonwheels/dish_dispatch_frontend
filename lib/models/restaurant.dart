@@ -1,3 +1,4 @@
+import 'package:dish_dispatch/models/orders.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'restaurant.g.dart';
@@ -16,6 +17,13 @@ class BaseRestaurant {
 
   factory BaseRestaurant.fromJson(Map<String, dynamic> json) =>
       _$BaseRestaurantFromJson(json);
+
+  factory BaseRestaurant.fromOrderRestaurant(OrderRestaurant restaurant) =>
+      BaseRestaurant(
+        phone: restaurant.phone,
+        name: restaurant.name,
+        cuisine: "",
+      );
 }
 
 @JsonSerializable()

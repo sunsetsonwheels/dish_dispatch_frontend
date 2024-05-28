@@ -1,4 +1,3 @@
-import 'package:dish_dispatch/models/cart.dart';
 import 'package:dish_dispatch/models/customers.dart';
 import 'package:dish_dispatch/models/orders.dart';
 import 'package:dish_dispatch/providers/api_provider.dart';
@@ -16,28 +15,26 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final notesController = TextEditingController();
-  late Order order;
+  late Customer customer;
+  late OrderRequest order;
   bool isCheckingOut = false;
 
   @override
   void initState() {
     CartProvider cartProvider =
         Provider.of<CartProvider>(context, listen: false);
-    Map<String, Map<String, CartItem>> cart = {};
-    for (final restaurantEntry in cartProvider.cart.entries) {
-      cart["${restaurantEntry.key.phone};${restaurantEntry.key.name}"] =
-          restaurantEntry.value;
-    }
-    Customer customer =
-        Provider.of<APIProvider>(context, listen: false).customer!;
-    order = Order(
-      date: DateTime.now(),
-      cart: cart,
+    customer = Provider.of<APIProvider>(context, listen: false).customer!;
+    order = OrderRequest(
+      cart: cartProvider.getRequestCart(),
       summary: OrderSummary(
         subtotal: cartProvider.total,
         surcharge: 0.03,
       ),
-      customer: customer,
+      deliveryInfo: OrderDeliveryInfo(
+        phone: customer.phone,
+        name: customer.name,
+        address: customer.address,
+      ),
       usedMembership: false,
     );
 
@@ -57,7 +54,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     if (notesController.text.isNotEmpty) {
       order.notes = notesController.text;
     }
-    order.date = DateTime.now();
     await Provider.of<APIProvider>(context, listen: false).submitCustomerOrder(
       order: order,
     );
@@ -78,17 +74,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ),
       ListTile(
         title: const Text("Phone"),
-        subtitle: Text(order.customer.phone),
+        subtitle: Text(order.deliveryInfo.phone),
         trailing: const Icon(Icons.phone),
       ),
       ListTile(
         title: const Text("Name"),
-        subtitle: Text(order.customer.name),
+        subtitle: Text(order.deliveryInfo.name),
         trailing: const Icon(Icons.person),
       ),
       ListTile(
         title: const Text("Address"),
-        subtitle: Text(order.customer.address),
+        subtitle: Text(order.deliveryInfo.address),
         trailing: const Icon(Icons.location_pin),
       ),
       ListTile(
@@ -98,10 +94,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
       ),
       RadioListTile(
-        toggleable: order.customer.membership != null,
+        toggleable: customer.membership != null,
         value: true,
         groupValue: order.usedMembership,
-        onChanged: !isCheckingOut && order.customer.membership != null
+        onChanged: !isCheckingOut && customer.membership != null
             ? (_) {
                 setState(() {
                   order.usedMembership = true;
@@ -111,7 +107,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             : null,
         secondary: const Icon(Icons.add),
         title: const Text("Dish Dispatch Pro"),
-        subtitle: Text(order.customer.membership == null
+        subtitle: Text(customer.membership == null
             ? "Subscribe to Dish Dispatch Pro to access benefits."
             : "Pay with & use your membership benefits for this order."),
       ),
@@ -130,7 +126,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         secondary: const Icon(Icons.credit_card),
         title: const Text("Credit card"),
         subtitle: Text(
-            "Use credit card on file (${order.customer.creditCard.toString()}). Higher costs."),
+            "Use credit card on file (${customer.creditCard.toString()}). Higher costs."),
       ),
       ListTile(
         leading: Text(

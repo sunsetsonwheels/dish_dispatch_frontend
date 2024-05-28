@@ -204,7 +204,7 @@ class APIProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> submitCustomerOrder({required Order order}) async {
+  Future<void> submitCustomerOrder({required OrderRequest order}) async {
     await _sendRequest(
       "/customers/orders",
       method: "POST",
@@ -213,24 +213,30 @@ class APIProvider extends ChangeNotifier {
     );
   }
 
-  Future<List<Order>> getCustomerOrders() async {
-    try {
-      final orders = jsonDecode(await _sendRequest(
-        "/customers/orders",
-        authRequired: true,
-      )) as List<dynamic>;
-      return orders
-          .map<Order>((json) => Order.fromJson(json as Map<String, dynamic>))
-          .toList();
-    } catch (err) {
-      print(err.toString());
-      return [];
-    }
+  Future<List<OrderResponse>> getCustomerOrders() async {
+    final orders = jsonDecode(await _sendRequest(
+      "/customers/orders",
+      authRequired: true,
+    )) as List;
+    return [for (final order in orders) OrderResponse.fromJson(order)];
   }
 
-  Future<Order> getCustomerOrder({required String id}) async {
-    return Order.fromJson(jsonDecode(
+  Future<OrderResponse> getCustomerOrder({required String id}) async {
+    return OrderResponse.fromJson(jsonDecode(
         await _sendRequest("/customers/orders/$id", authRequired: true)));
+  }
+
+  Future<void> rateCustomerOrderInOrder({
+    required String parentId,
+    required String id,
+    required OrderReview review,
+  }) async {
+    await _sendRequest(
+      "/customers/orders/$parentId/$id/rate",
+      method: "PATCH",
+      body: review.toJson(),
+      authRequired: true,
+    );
   }
 
   // MARK: Restaurants

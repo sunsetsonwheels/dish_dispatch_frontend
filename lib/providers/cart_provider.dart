@@ -14,6 +14,14 @@ class CartProvider extends ChangeNotifier {
     return t;
   }
 
+  Map<String, Map<String, CartItem>> getRequestCart() {
+    Map<String, Map<String, CartItem>> requestCart = {};
+    for (final restaurant in cart.keys) {
+      requestCart[restaurant.phone] = cart[restaurant]!;
+    }
+    return requestCart;
+  }
+
   void add({
     required BaseRestaurant restaurant,
     required String item,

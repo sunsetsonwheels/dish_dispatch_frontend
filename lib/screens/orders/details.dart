@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:dish_dispatch/models/orders.dart';
-import 'package:dish_dispatch/models/restaurant.dart';
 import 'package:dish_dispatch/providers/api_provider.dart';
 import 'package:dish_dispatch/widgets/cart/item_list_tile.dart';
 import 'package:dish_dispatch/widgets/orders/order_status_chip.dart';
+import 'package:dish_dispatch/widgets/orders/review_alert.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -20,12 +20,12 @@ class OrderDetailsScreen extends StatefulWidget {
 class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   late Timer refresher;
   late APIProvider api;
-  late Future<Order> orderFuture;
+  late Future<OrderResponse> orderFuture;
 
   @override
   void initState() {
     api = Provider.of<APIProvider>(context, listen: false);
-    `orderFuture = api.getCustomerOrder(id: widget.id);`
+    orderFuture = api.getCustomerOrder(id: widget.id);
     refresher = Timer.periodic(const Duration(seconds: 10), (t) {
       setState(() {
         orderFuture = api.getCustomerOrder(id: widget.id);
@@ -50,7 +50,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             child: CircularProgressIndicator(),
           );
         }
-        Order order = snapshot.requireData!;
+        final order = snapshot.requireData;
         TextStyle? titleMedium = Theme.of(context).textTheme.titleMedium;
         List<Widget> listChildren = [
           ListTile(
@@ -61,17 +61,17 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           ),
           ListTile(
             title: const Text("Phone"),
-            subtitle: Text(order.customer.phone),
+            subtitle: Text(order.deliveryInfo.phone),
             trailing: const Icon(Icons.phone),
           ),
           ListTile(
             title: const Text("Name"),
-            subtitle: Text(order.customer.name),
+            subtitle: Text(order.deliveryInfo.name),
             trailing: const Icon(Icons.person),
           ),
           ListTile(
             title: const Text("Address"),
-            subtitle: Text(order.customer.address),
+            subtitle: Text(order.deliveryInfo.address),
             trailing: const Icon(Icons.location_pin),
           ),
           ListTile(
@@ -81,27 +81,36 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             ),
           ),
         ];
-        for (final restaurantStringEntry in order.cart.entries) {
-          List<String> restaurantString = restaurantStringEntry.key.split(";");
-          BaseRestaurant restaurant = BaseRestaurant(
-            phone: restaurantString[0],
-            name: restaurantString[1],
-            cuisine: "",
-          );
+        final orderItems = order.toDetailsMap();
+        for (final restaurantOrders in orderItems.entries) {
           List<Widget> itemChildren = [];
-          for (final itemEntry in restaurantStringEntry.value.entries) {
+          for (final item in restaurantOrders.value.items.entries) {
             itemChildren.add(
               CartItemListTile(
-                restaurant: restaurant,
-                item: itemEntry.key,
-                details: itemEntry.value,
+                restaurant: restaurantOrders.key,
+                item: item.key,
+                details: item.value,
                 readOnly: true,
               ),
             );
           }
           listChildren.add(
             ExpansionTile(
-              title: Text(restaurant.name),
+              leading: IconButton.outlined(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => OrderReviewAlert(
+                      parentId: order.id,
+                      id: restaurantOrders.value.id,
+                      previousReview: restaurantOrders.value.review,
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.rate_review),
+              ),
+              trailing: OrderStatusChip(status: restaurantOrders.value.status),
+              title: Text(restaurantOrders.key.name),
               initiallyExpanded: true,
               children: itemChildren,
             ),
@@ -149,7 +158,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         return Scaffold(
           appBar: AppBar(
             title: const Text("Order details"),
-            actions: [OrderStatusChip(status: order.status)],
           ),
           body: ListView(
             children: listChildren,

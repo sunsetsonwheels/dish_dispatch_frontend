@@ -13,9 +13,23 @@ class OrdersListScreen extends StatefulWidget {
 }
 
 class _OrdersListScreenState extends State<OrdersListScreen> {
+  late Future<List<OrderResponse>> ordersFuture;
+
+  void newFuture() {
+    setState(() {
+      ordersFuture =
+          Provider.of<APIProvider>(context, listen: false).getCustomerOrders();
+    });
+  }
+
+  @override
+  void initState() {
+    newFuture();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    APIProvider api = Provider.of<APIProvider>(context, listen: false);
     Routemaster router = Routemaster.of(context);
 
     return Scaffold(
@@ -23,21 +37,24 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
         title: const Text("Orders"),
         actions: [
           IconButton(
+            onPressed: newFuture,
+            icon: const Icon(Icons.refresh),
+          ),
+          IconButton.filledTonal(
             onPressed: () => router.push("/customer"),
             icon: const Icon(Icons.person_2),
           )
         ],
       ),
-      body: FutureBuilder<List<Order>>(
-        future: api.getCustomerOrders(),
+      body: FutureBuilder(
+        future: ordersFuture,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
-          List<Order> orders = snapshot.requireData;
-
+          final orders = snapshot.requireData;
           return ListView.builder(
             itemBuilder: (context, i) {
               return OrderListTile(order: orders[i]);
