@@ -1,3 +1,4 @@
+import 'package:dish_dispatch/widgets/root/tab_view_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:routemaster/routemaster.dart';
 
@@ -21,7 +22,7 @@ class RootNavigation extends StatelessWidget {
                   label: Text("Restaurants"),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.trolley),
+                  icon: Icon(Icons.shopping_cart),
                   label: Text("Cart"),
                 ),
                 NavigationRailDestination(
@@ -38,15 +39,7 @@ class RootNavigation extends StatelessWidget {
               width: 1,
               thickness: 1,
             ),
-          Expanded(
-            child: TabBarView(
-              controller: tabPage.controller,
-              children: [
-                for (final stack in tabPage.stacks)
-                  PageStackNavigator(stack: stack)
-              ],
-            ),
-          )
+          const TabViewWrapper(),
         ],
       ),
       bottomNavigationBar: isVertical
@@ -58,7 +51,7 @@ class RootNavigation extends StatelessWidget {
                   label: "Restaurants",
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.trolley),
+                  icon: Icon(Icons.shopping_cart),
                   label: "Cart",
                 ),
                 NavigationDestination(

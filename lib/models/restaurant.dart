@@ -1,20 +1,46 @@
-class Restaurant {
+import 'package:dish_dispatch/models/orders.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'restaurant.g.dart';
+
+@JsonSerializable()
+class BaseRestaurant {
+  final String phone;
   final String name;
-  final String address;
   final String cuisine;
 
-  Restaurant({
+  BaseRestaurant({
+    required this.phone,
     required this.name,
-    required this.address,
     required this.cuisine,
   });
 
-  Restaurant.fromJson(Map<String, dynamic> json)
-      : name = json['name'] as String,
-        address = json['address'] as String,
-        cuisine = json['cuisine'] as String;
+  factory BaseRestaurant.fromJson(Map<String, dynamic> json) =>
+      _$BaseRestaurantFromJson(json);
+
+  factory BaseRestaurant.fromOrderRestaurant(OrderRestaurant restaurant) =>
+      BaseRestaurant(
+        phone: restaurant.phone,
+        name: restaurant.name,
+        cuisine: "",
+      );
 }
 
+@JsonSerializable()
+class RestaurantResponse {
+  final List<BaseRestaurant> restaurants;
+  final List<String> cuisines;
+
+  RestaurantResponse({
+    required this.restaurants,
+    required this.cuisines,
+  });
+
+  factory RestaurantResponse.fromJson(Map<String, dynamic> json) =>
+      _$RestaurantResponseFromJson(json);
+}
+
+@JsonSerializable()
 class MenuItem {
   final String description;
   final double price;
@@ -24,23 +50,44 @@ class MenuItem {
     required this.price,
   });
 
-  MenuItem.fromJson(Map<String, dynamic> json)
-      : description = json['description'] as String,
-        price = json['price'] as double;
+  factory MenuItem.fromJson(Map<String, dynamic> json) =>
+      _$MenuItemFromJson(json);
 }
 
-class RestaurantDetails extends Restaurant {
+@JsonSerializable()
+class Restaurant extends BaseRestaurant {
+  final String address;
   final Map<String, MenuItem> menu;
 
-  RestaurantDetails({
+  Restaurant({
+    required super.phone,
     required super.name,
-    required super.address,
     required super.cuisine,
+    required this.address,
     required this.menu,
   });
 
-  RestaurantDetails.fromJson(Map<String, dynamic> json)
-      : menu = (json["menu"] as Map<String, dynamic>)
-            .map((k, v) => MapEntry(k, MenuItem.fromJson(v))),
-        super.fromJson(json);
+  factory Restaurant.fromJson(Map<String, dynamic> json) =>
+      _$RestaurantFromJson(json);
+}
+
+@JsonSerializable(createToJson: false)
+class RestaurantRating {
+  final double average;
+  final List<String> recent;
+
+  const RestaurantRating({required this.average, required this.recent});
+
+  factory RestaurantRating.fromJson(Map<String, dynamic> json) =>
+      _$RestaurantRatingFromJson(json);
+}
+
+@JsonSerializable(createToJson: false)
+class RestaurantRevenue {
+  final double total;
+
+  const RestaurantRevenue({required this.total});
+
+  factory RestaurantRevenue.fromJson(Map<String, dynamic> json) =>
+      _$RestaurantRevenueFromJson(json);
 }

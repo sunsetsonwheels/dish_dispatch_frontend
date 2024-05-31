@@ -15,15 +15,23 @@ class RestaurantDetailScreen extends StatefulWidget {
 
 class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   late APIProvider api;
+  late Future<Restaurant> restaurant;
+  final ScrollController controller = ScrollController();
+
+  @override
+  void initState() {
+    api = Provider.of<APIProvider>(context, listen: false);
+    restaurant = api.getRestaurantDetails(id: widget.id);
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    api = Provider.of<APIProvider>(context);
-    ThemeData theme = Theme.of(context);
     bool isVertical = MediaQuery.of(context).size.width < 640;
 
     return FutureBuilder(
-      future: api.getRestaurantDetails(id: widget.id),
+      future: restaurant,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Scaffold(
@@ -35,7 +43,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             ),
           );
         }
-        final RestaurantDetails restaurant = snapshot.requireData;
+        final Restaurant restaurant = snapshot.requireData;
         List<Widget> listChildren = [
           ListTile(
             title: const Text("Cuisine"),
@@ -58,66 +66,31 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           (key, value) {
             menuGridChildren.add(
               RestaurantMenuListItem(
-                restaurantId: widget.id,
+                restaurant: restaurant,
                 name: key,
                 item: value,
               ),
             );
           },
         );
+        listChildren.add(Padding(
+          padding: const EdgeInsets.all(16),
+          child: GridView.count(
+            controller: controller,
+            shrinkWrap: true,
+            crossAxisCount: isVertical ? 1 : 2,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            children: menuGridChildren,
+          ),
+        ));
         return Scaffold(
-          body: CustomScrollView(
-            slivers: [
-              SliverAppBar.large(
-                pinned: true,
-                flexibleSpace: FlexibleSpaceBar(
-                  centerTitle: false,
-                  title: Text(
-                    restaurant.name,
-                  ),
-                  background: Image.network(
-                    api.getRestaurantImageUri(
-                      restaurant: widget.id,
-                      filename: "hero.jpg",
-                    ),
-                    fit: BoxFit.cover,
-                    opacity: const AlwaysStoppedAnimation(0.4),
-                  ),
-                ),
-              ),
-              const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text(
-                    "Info",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-              SliverList.list(children: listChildren),
-              const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text(
-                    "Menu",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.only(
-                  left: 16,
-                  right: 16,
-                  bottom: 16,
-                ),
-                sliver: SliverGrid.count(
-                  crossAxisCount: isVertical ? 1 : 2,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
-                  children: menuGridChildren,
-                ),
-              ),
-            ],
+          appBar: AppBar(
+            title: Text(restaurant.name),
+          ),
+          body: ListView(
+            controller: controller,
+            children: listChildren,
           ),
         );
       },
