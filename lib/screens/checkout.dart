@@ -30,6 +30,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         subtotal: cartProvider.total,
         surcharge: 0.03,
       ),
+      customerPhone: customer.phone,
       deliveryInfo: OrderDeliveryInfo(
         phone: customer.phone,
         name: customer.name,

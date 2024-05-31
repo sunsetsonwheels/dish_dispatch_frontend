@@ -48,6 +48,7 @@ class _OrderReviewAlertState extends State<OrderReviewAlert> {
       if (commentController.text.isEmpty) {
         throw Exception("Comment cannot be empty!");
       }
+      review.comment = commentController.text;
       await Provider.of<APIProvider>(context, listen: false)
           .rateCustomerOrderInOrder(
         parentId: widget.parentId,
@@ -74,7 +75,7 @@ class _OrderReviewAlertState extends State<OrderReviewAlert> {
         mainAxisSize: MainAxisSize.min,
         children: [
           AnimatedRatingStars(
-            initialRating: 1,
+            initialRating: 5,
             minRating: 1,
             maxRating: 5,
             onChanged: (rating) {

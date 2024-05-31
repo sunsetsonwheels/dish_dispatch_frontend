@@ -70,3 +70,24 @@ class Restaurant extends BaseRestaurant {
   factory Restaurant.fromJson(Map<String, dynamic> json) =>
       _$RestaurantFromJson(json);
 }
+
+@JsonSerializable(createToJson: false)
+class RestaurantRating {
+  final double average;
+  final List<String> recent;
+
+  const RestaurantRating({required this.average, required this.recent});
+
+  factory RestaurantRating.fromJson(Map<String, dynamic> json) =>
+      _$RestaurantRatingFromJson(json);
+}
+
+@JsonSerializable(createToJson: false)
+class RestaurantRevenue {
+  final double total;
+
+  const RestaurantRevenue({required this.total});
+
+  factory RestaurantRevenue.fromJson(Map<String, dynamic> json) =>
+      _$RestaurantRevenueFromJson(json);
+}

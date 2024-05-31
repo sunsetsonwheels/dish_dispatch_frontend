@@ -63,3 +63,15 @@ Map<String, dynamic> _$RestaurantToJson(Restaurant instance) =>
       'address': instance.address,
       'menu': instance.menu,
     };
+
+RestaurantRating _$RestaurantRatingFromJson(Map<String, dynamic> json) =>
+    RestaurantRating(
+      average: (json['average'] as num).toDouble(),
+      recent:
+          (json['recent'] as List<dynamic>).map((e) => e as String).toList(),
+    );
+
+RestaurantRevenue _$RestaurantRevenueFromJson(Map<String, dynamic> json) =>
+    RestaurantRevenue(
+      total: (json['total'] as num).toDouble(),
+    );

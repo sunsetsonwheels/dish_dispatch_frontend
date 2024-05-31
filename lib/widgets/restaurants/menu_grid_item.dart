@@ -61,7 +61,7 @@ class RestaurantMenuListItem extends StatelessWidget {
               ),
             ],
           ),
-          trailing: IconButton.outlined(
+          trailing: IconButton.filledTonal(
             onPressed: () => showAddSheet(context),
             icon: const Icon(Icons.add_shopping_cart),
           ),

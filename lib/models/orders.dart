@@ -94,6 +94,7 @@ class ISODateTimeConverter implements JsonConverter<DateTime, String> {
   String toJson(DateTime date) => date.toIso8601String();
 }
 
+@JsonSerializable()
 class BaseOrder {
   OrderSummary summary;
   String? notes;
@@ -108,6 +109,9 @@ class BaseOrder {
     required this.deliveryInfo,
     required this.usedMembership,
   });
+
+  factory BaseOrder.fromJson(Map<String, dynamic> json) =>
+      _$BaseOrderFromJson(json);
 }
 
 @JsonSerializable()
@@ -133,30 +137,10 @@ class OrderRestaurant {
   Map<String, dynamic> toJson() => _$OrderRestaurantToJson(this);
 }
 
-@JsonSerializable()
-class OrderInOrder {
-  final String id;
-  final OrderRestaurant restaurant;
-  Map<String, CartItem> items;
-  OrderStatus status;
-  OrderReview? review;
-
-  OrderInOrder({
-    required this.id,
-    required this.restaurant,
-    required this.items,
-    required this.status,
-    this.review,
-  });
-
-  factory OrderInOrder.fromJson(Map<String, dynamic> json) =>
-      _$OrderInOrderFromJson(json);
-
-  Map<String, dynamic> toJson() => _$OrderInOrderToJson(this);
-}
-
 @JsonSerializable(createFactory: false)
 class OrderRequest extends BaseOrder {
+  @JsonKey(name: "customer_phone")
+  String customerPhone;
   Map<String, Map<String, CartItem>> cart;
 
   OrderRequest({
@@ -164,13 +148,14 @@ class OrderRequest extends BaseOrder {
     super.notes,
     required super.deliveryInfo,
     required super.usedMembership,
+    required this.customerPhone,
     this.cart = const {},
   });
 
   Map<String, dynamic> toJson() => _$OrderRequestToJson(this);
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class OrderResponse extends BaseOrder {
   final String id;
   @ISODateTimeConverter()
@@ -178,7 +163,7 @@ class OrderResponse extends BaseOrder {
   @JsonKey(name: "customer_phone")
   String customerPhone;
   @JsonKey(name: "related_orders")
-  List<OrderInOrder> relatedOrders;
+  List<OrderInOrder>? relatedOrders;
 
   OrderResponse({
     required super.summary,
@@ -196,8 +181,52 @@ class OrderResponse extends BaseOrder {
 
   Map<BaseRestaurant, OrderInOrder> toDetailsMap() {
     return {
-      for (final order in relatedOrders)
+      for (final order in relatedOrders!)
         BaseRestaurant.fromOrderRestaurant(order.restaurant): order
     };
   }
+}
+
+@JsonSerializable()
+class BaseOrderInOrder {
+  final String id;
+  final double total;
+  OrderStatus status;
+  OrderReview? review;
+  @ISODateTimeConverter()
+  final DateTime date;
+
+  BaseOrderInOrder({
+    required this.id,
+    required this.total,
+    required this.status,
+    this.review,
+    required this.date,
+  });
+
+  factory BaseOrderInOrder.fromJson(Map<String, dynamic> json) =>
+      _$BaseOrderInOrderFromJson(json);
+}
+
+@JsonSerializable()
+class OrderInOrder extends BaseOrderInOrder {
+  final OrderResponse? parent;
+  final OrderRestaurant restaurant;
+  Map<String, CartItem> items;
+
+  OrderInOrder({
+    required super.id,
+    this.parent,
+    required this.restaurant,
+    required super.total,
+    required this.items,
+    required super.status,
+    super.review,
+    required super.date,
+  });
+
+  factory OrderInOrder.fromJson(Map<String, dynamic> json) =>
+      _$OrderInOrderFromJson(json);
+
+  Map<String, dynamic> toJson() => _$OrderInOrderToJson(this);
 }

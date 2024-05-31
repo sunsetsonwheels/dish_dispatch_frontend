@@ -13,7 +13,7 @@ class OrderListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(fmt.format(order.date.toLocal())),
-      subtitle: Text("from ${order.relatedOrders.length} restaurants"),
+      subtitle: Text("from ${order.relatedOrders!.length} restaurants"),
       trailing: Text(
         "\$${order.summary.total.toStringAsFixed(2)}",
         style: Theme.of(context).textTheme.titleMedium,

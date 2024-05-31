@@ -1,4 +1,6 @@
 PODS:
+  - animated_rating_stars (0.0.1):
+    - Flutter
   - Flutter (1.0.0)
   - flutter_secure_storage (3.3.1):
     - Flutter
@@ -13,6 +15,7 @@ PODS:
     - FlutterMacOS
 
 DEPENDENCIES:
+  - animated_rating_stars (from `.symlinks/plugins/animated_rating_stars/ios`)
   - Flutter (from `Flutter`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
@@ -20,6 +23,8 @@ DEPENDENCIES:
   - sqflite (from `.symlinks/plugins/sqflite/darwin`)
 
 EXTERNAL SOURCES:
+  animated_rating_stars:
+    :path: ".symlinks/plugins/animated_rating_stars/ios"
   Flutter:
     :path: Flutter
   flutter_secure_storage:
@@ -32,6 +37,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/sqflite/darwin"
 
 SPEC CHECKSUMS:
+  animated_rating_stars: 4627b871e2cfeddfe811952f5b3e9dc62a9bbe46
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_secure_storage: 7953c38a04c3fdbb00571bcd87d8e3b5ceb9daec
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
